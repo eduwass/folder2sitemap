@@ -1,0 +1,56 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const path = require('path');
+
+const get_title_from_html = (filePath) => {
+  const htmlContent = fs.readFileSync(filePath, 'utf8');
+  const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/);
+  return titleMatch ? titleMatch[1] : 'No Title Found';
+};
+
+const create_site_structure_json = (directory, base_path) => {
+  const root_index_path = path.join(directory, 'index.html');
+  const root_title = fs.existsSync(root_index_path) ? get_title_from_html(root_index_path) : 'Home'; // Fallback to 'Home' if no index.html exists
+
+  const site_structure = {
+    slug: '/',
+    title: root_title,
+    children: []
+  };
+
+  const processDirectory = (dir, parentSlug) => {
+    fs.readdirSync(dir).forEach(item => {
+      const fullPath = path.join(dir, item);
+      if (fs.statSync(fullPath).isDirectory()) {
+        const index_path = path.join(fullPath, 'index.html');
+        if (fs.existsSync(index_path)) {
+          const relativePath = path.relative(base_path, fullPath);
+          const slugSegments = parentSlug === '/' ? [parentSlug] : parentSlug.split('/');
+          const newSegment = relativePath.split('/').pop();
+          const slug = `${slugSegments.join('/')}${newSegment}/`;
+          const title = get_title_from_html(index_path);
+          const childStructure = {
+            slug: slug,
+            title: title,
+            children: []
+          };
+          processDirectory(fullPath, slug);
+          site_structure.children.push(childStructure);
+        } else {
+          processDirectory(fullPath, `${parentSlug}${item}/`);
+        }
+      }
+    });
+  };
+
+  if (fs.existsSync(path.join(directory, 'index.html'))) {
+    site_structure.title = get_title_from_html(path.join(directory, 'index.html'));
+  }
+  processDirectory(directory, '/');
+
+  return site_structure;
+};
+
+// Get site_root from command line arguments
+const site_root = process.argv[2] || './example.com';
+console.log(JSON.stringify(create_site_structure_json(site_root, site_root), null, 2));
