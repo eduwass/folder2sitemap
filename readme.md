@@ -24,15 +24,8 @@ The script extracts the title of each page from the `<title>` tag in the HTML fi
 - **JSON Output**: Outputs the website structure in a readable JSON format.
 - **CSV Output**: Outputs the website structure in CSV format.
 - **Exclusion of Directories**: Allows you to exclude specific directories from the sitemap generation.
-
-## Dependencies
-folder2sitemap relies on the following dependencies:
-- [jsdom](package.json#3%2C6-3%2C6): For parsing HTML content. Ensure you have it in your [package.json](package.json#1%2C1-1%2C1) dependencies.
-```json:package.json
-  "dependencies": {
-    "jsdom": "^24.0.0"
-  }
-```
+- **Custom Output File**: Option to save the output directly to a file.
+- **No Dependencies**: Requires only Node.js to run.
 
 ## Installation
 1. Ensure you have Node.js installed on your system.
