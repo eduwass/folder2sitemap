@@ -3,6 +3,8 @@
 ## Background
 I worked this as a tool that would generate a sitemap from a [webtozip.com](https://webtozip.com) download. 
 
+It should probably work with other website export tools like [HTTrack](https://www.httrack.com/), [SiteSucker](https://ricks-apps.com/osx/sitesucker/index.html), or [Archivarix](https://archivarix.com/), but I haven't tested it with those tools.
+
 The download is a zip file that contains the entire website. The website is structured in a way that the root directory contains the index.html file and the rest of the website is structured in directories. 
 
 Each directory contains an index.html file that represents the page. The script scans the directories recursively to build a nested structure of the website. 
