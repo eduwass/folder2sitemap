@@ -52,5 +52,15 @@ const create_site_structure_json = (directory, base_path) => {
 };
 
 // Get site_root from command line arguments
-const site_root = process.argv[2] || './example.com';
-console.log(JSON.stringify(create_site_structure_json(site_root, site_root), null, 2));
+const args = process.argv.slice(2);
+const site_root = args.find(arg => !arg.startsWith('--')) || './example.com';
+const outputArg = args.find(arg => arg.startsWith('--output='));
+const outputFile = outputArg ? outputArg.split('=')[1] : null;
+
+const result = JSON.stringify(create_site_structure_json(site_root, site_root), null, 2);
+
+if (outputFile) {
+  fs.writeFileSync(outputFile, result);
+} else {
+  console.log(result);
+}

@@ -35,6 +35,13 @@ The script will output the structure of your website in JSON format to the conso
 node folder2sitemap.js /path/to/your/website > site_structure.json
 ```
 
+### Saving Output to a File Directly
+To save the output directly to a file, use the `--output` flag followed by the file name:
+
+```bash
+node folder2sitemap.js /path/to/your/website --output site_structure.json
+```
+
 ## Example Output
 Given a website with a simple structure, the output might look like this:
 
