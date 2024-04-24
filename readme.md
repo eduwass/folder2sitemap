@@ -1,7 +1,7 @@
 # Folder2Sitemap README
 
 ## Overview
-Folder2Sitemap is a Node.js script designed to generate a JSON representation of a website's structure based on its directory and file organization. It scans a specified directory for HTML files, particularly looking for [index.html](file:///Users/eduwass/Sites/folder_to_sitemap/example.com/index.html#1%2C1-1%2C1) files in each directory to determine the structure of the website. The script extracts the title of each page from the `<title>` tag in the HTML files and uses the directory structure to create a hierarchical JSON object representing the site's structure.
+Folder2Sitemap is a Node.js script designed to generate a JSON representation of a website's structure based on its directory and file organization. It scans a specified directory for HTML files, particularly looking for [index.html](example.com/index.html#1%2C1-1%2C1) files in each directory to determine the structure of the website. The script extracts the title of each page from the `<title>` tag in the HTML files and uses the directory structure to create a hierarchical JSON object representing the site's structure.
 
 ## Features
 - **Title Extraction**: Extracts titles directly from the HTML files to accurately represent each page.
@@ -52,8 +52,7 @@ Given a website with a simple structure, the output might look like this:
   "children": [
     {
       "slug": "/about/",
-      "title": "About",
-      "children": []
+      "title": "About"
     },
     {
       "slug": "/blog/",
@@ -61,19 +60,22 @@ Given a website with a simple structure, the output might look like this:
       "children": [
         {
           "slug": "/blog/post1/",
-          "title": "Post 1",
-          "children": []
+          "title": "Post 1"
         },
         {
           "slug": "/blog/post2/",
-          "title": "Post 2",
-          "children": []
+          "title": "Post 2"
         }
       ]
     }
   ]
 }
 ```
+
+## Visualizing the Sitemap
+You can use online tools like [JSON Crack](https://jsoncrack.com/) to visualize the JSON output in a more structured format. Simply paste the JSON output into the tool to see a visual representation of the website structure.
+
+![alt text](visual.png)
 
 ## Contributing
 Contributions to Folder2Sitemap are welcome. Please ensure you follow the existing code structure and submit a pull request for any enhancements or bug fixes.
