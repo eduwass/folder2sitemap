@@ -53,7 +53,7 @@ const createSiteStructureJSON = (directory, basePath, exclusions) => {
 const convertToCSV = (siteStructure) => {
   let csv = 'slug,title\n';
   const processNode = (node, parentSlug = '') => {
-    const fullSlug = parentSlug === '/' ? node.slug : `${parentSlug}${node.slug}`;
+    const fullSlug = parentSlug === '/' ? node.slug : `${node.slug}`;
     csv += `"${fullSlug}","${node.title.replace(/"/g, '""')}"\n`;
     node.children?.forEach(child => processNode(child, fullSlug));
   };
