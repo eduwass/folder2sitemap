@@ -21,10 +21,9 @@ const create_site_structure_json = (directory, base_path, exclusions) => {
     let children = [];
     fs.readdirSync(dir).forEach(item => {
       const fullPath = path.join(dir, item);
-      // Check if the path is excluded
       const relativePath = path.relative(base_path, fullPath);
       if (exclusions.some(exclusion => relativePath.startsWith(exclusion))) {
-        return; // Skip excluded paths
+        return;
       }
       if (fs.statSync(fullPath).isDirectory()) {
         const index_path = path.join(fullPath, 'index.html');
@@ -58,14 +57,35 @@ const create_site_structure_json = (directory, base_path, exclusions) => {
   return site_structure;
 };
 
-// Get site_root and exclusions from command line arguments
+const convertToCSV = (siteStructure) => {
+  let csv = 'slug,title\n';
+  const processNode = (node, parentSlug = '') => {
+    // Ensure that there is no double slash when concatenating parentSlug and node.slug
+    const fullSlug = parentSlug === '/' ? `${node.slug}` : `${node.slug}`;
+    csv += `"${fullSlug}","${node.title.replace(/"/g, '""')}"\n`;
+    if (node.children) {
+      node.children.forEach(child => processNode(child, fullSlug));
+    }
+  };
+  processNode(siteStructure);
+  return csv;
+};
+
 const args = process.argv.slice(2);
 const site_root = args.find(arg => !arg.startsWith('--')) || './example.com';
 const exclusions = args.filter(arg => arg.startsWith('--exclude=')).map(arg => arg.split('=')[1]);
 const outputArg = args.find(arg => arg.startsWith('--output='));
 const outputFile = outputArg ? outputArg.split('=')[1] : null;
+const formatArg = args.find(arg => arg.startsWith('--format='));
+const outputFormat = formatArg ? formatArg.split('=')[1] : 'json';
 
-const result = JSON.stringify(create_site_structure_json(site_root, site_root, exclusions), null, 2);
+const siteStructure = create_site_structure_json(site_root, site_root, exclusions);
+let result;
+if (outputFormat === 'csv') {
+  result = convertToCSV(siteStructure);
+} else {
+  result = JSON.stringify(siteStructure, null, 2);
+}
 
 if (outputFile) {
   fs.writeFileSync(outputFile, result);

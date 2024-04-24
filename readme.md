@@ -1,15 +1,32 @@
-# Folder2Sitemap README
+# folder2sitemap
+
+## Background
+I worked this as a tool that would generate a sitemap from a [webtozip.com](https://webtozip.com) download. 
+
+The download is a zip file that contains the entire website. The website is structured in a way that the root directory contains the index.html file and the rest of the website is structured in directories. 
+
+Each directory contains an index.html file that represents the page. The script scans the directories recursively to build a nested structure of the website. 
+
+The script extracts the title of each page from the `<title>` tag in the HTML files and uses the directory structure to create a hierarchical JSON object representing the site's structure.
 
 ## Overview
-Folder2Sitemap is a Node.js script designed to generate a JSON representation of a website's structure based on its directory and file organization. It scans a specified directory for HTML files, particularly looking for [index.html](example.com/index.html#1%2C1-1%2C1) files in each directory to determine the structure of the website. The script extracts the title of each page from the `<title>` tag in the HTML files and uses the directory structure to create a hierarchical JSON object representing the site's structure.
+folder2sitemap is a Node.js script designed to generate a JSON representation of a website's structure based on its directory and file organization. 
+
+It scans a specified directory for HTML files, particularly looking for [index.html](example.com/index.html#1%2C1-1%2C1) files in each directory to determine the structure of the website. 
+
+Note that index.html files ARE REQUIRED for the script to work properly.
+
+The script extracts the title of each page from the `<title>` tag in the HTML files and uses the directory structure to create a hierarchical JSON object representing the site's structure.
 
 ## Features
 - **Title Extraction**: Extracts titles directly from the HTML files to accurately represent each page.
 - **Recursive Directory Traversal**: Scans directories recursively to build a nested structure of the website.
 - **JSON Output**: Outputs the website structure in a readable JSON format.
+- **CSV Output**: Outputs the website structure in CSV format.
+- **Exclusion of Directories**: Allows you to exclude specific directories from the sitemap generation.
 
 ## Dependencies
-Folder2Sitemap relies on the following dependencies:
+folder2sitemap relies on the following dependencies:
 - [jsdom](package.json#3%2C6-3%2C6): For parsing HTML content. Ensure you have it in your [package.json](package.json#1%2C1-1%2C1) dependencies.
 ```json:package.json
   "dependencies": {
@@ -23,30 +40,48 @@ Folder2Sitemap relies on the following dependencies:
 3. Install the required dependencies by running `npm install` in the directory where the script is located.
 
 ## Usage
-To use Folder2Sitemap, run the script from the command line, passing the path to the root directory of your website as an argument:
+To use folder2sitemap, run the script from the command line, passing the path to the root directory of your website as an argument:
 
 ```bash
-node folder2sitemap.js /path/to/your/website
+node folder2sitemap ./example.com
 ```
 
 The script will output the structure of your website in JSON format to the console. You can redirect this output to a file if needed:
 
 ```bash
-node folder2sitemap.js /path/to/your/website > site_structure.json
+node folder2sitemap ./example.com > site_structure.json
 ```
 
 ### Saving Output to a File Directly
 To save the output directly to a file, use the `--output` flag followed by the file name:
 
 ```bash
-node folder2sitemap.js /path/to/your/website --output site_structure.json
+node folder2sitemap ./example.com --output site_structure.json
 ```
+### Selecting Output Format
+By default, the script outputs the website structure in JSON format. If you prefer to output the structure in CSV format, use the `--format=csv` flag:
+
+```bash
+node folder2sitemap ./example.com --format=csv
+```
+
+Would output the website structure in CSV format to the console. You can redirect this output to a file as well:
+
+```csv
+slug,title
+"/","Home"
+"/about/","About"
+"/blog/","Blog"
+"/blog/post1/","Post 1"
+"/blog/post2/","Post 2"
+```
+
 ### Excluding Directories
 
 To exclude specific directories from the sitemap generation, use the `--exclude` flag followed by the directory name relative to the site root. You can specify multiple directories to exclude by using multiple `--exclude` flags. For example:
 
 ```bash
-node folder2sitemap.js /path/to/your/website --exclude=contentassets --exclude=zh-cn
+node folder2sitemap ./example.com --exclude=contentassets --exclude=zh-cn
 ```
 
 This command will generate the sitemap without including the directories `/contentassets` and `/zh-cn`.
@@ -85,9 +120,3 @@ Given a website with a simple structure, the output might look like this:
 You can use online tools like [JSON Crack](https://jsoncrack.com/) to visualize the JSON output in a more structured format. Simply paste the JSON output into the tool to see a visual representation of the website structure.
 
 ![alt text](visual.png)
-
-## Contributing
-Contributions to Folder2Sitemap are welcome. Please ensure you follow the existing code structure and submit a pull request for any enhancements or bug fixes.
-
-## License
-Folder2Sitemap is released under the MIT License. See the LICENSE file for more details.
