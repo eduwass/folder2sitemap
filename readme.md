@@ -5,9 +5,9 @@ I worked this as a tool that would generate a sitemap from a [webtozip.com](http
 
 It should probably work with other website export tools like [HTTrack](https://www.httrack.com/), [SiteSucker](https://ricks-apps.com/osx/sitesucker/index.html), or [Archivarix](https://archivarix.com/), but I haven't tested it with those tools.
 
-The download is a zip file that contains the entire website. The website is structured in a way that the root directory contains the index.html file and the rest of the website is structured in directories. 
+The download is a zip file that contains the entire website. The website is structured in a way that the root directory contains the `index.html` file and the rest of the website is structured in directories. 
 
-Each directory contains an index.html file that represents the page. The script scans the directories recursively to build a nested structure of the website. 
+Each directory contains an `index.html` file that represents the page. The script scans the directories recursively to build a nested structure of the website. 
 
 The script extracts the title of each page from the `<title>` tag in the HTML files and uses the directory structure to create a hierarchical JSON object representing the site's structure.
 
@@ -16,7 +16,7 @@ folder2sitemap is a Node.js script designed to generate a JSON representation of
 
 It scans a specified directory for HTML files, particularly looking for [index.html](example.com/index.html#1%2C1-1%2C1) files in each directory to determine the structure of the website. 
 
-Note that index.html files ARE REQUIRED for the script to work properly.
+Note that `index.html` files ARE REQUIRED for the script to work properly.
 
 The script extracts the title of each page from the `<title>` tag in the HTML files and uses the directory structure to create a hierarchical JSON object representing the site's structure.
 
