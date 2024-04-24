@@ -41,6 +41,15 @@ To save the output directly to a file, use the `--output` flag followed by the f
 ```bash
 node folder2sitemap.js /path/to/your/website --output site_structure.json
 ```
+### Excluding Directories
+
+To exclude specific directories from the sitemap generation, use the `--exclude` flag followed by the directory name relative to the site root. You can specify multiple directories to exclude by using multiple `--exclude` flags. For example:
+
+```bash
+node folder2sitemap.js /path/to/your/website --exclude=contentassets --exclude=zh-cn
+```
+
+This command will generate the sitemap without including the directories `/contentassets` and `/zh-cn`.
 
 ## Example Output
 Given a website with a simple structure, the output might look like this:

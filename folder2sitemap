@@ -8,9 +8,9 @@ const get_title_from_html = (filePath) => {
   return titleMatch ? titleMatch[1] : 'No Title Found';
 };
 
-const create_site_structure_json = (directory, base_path) => {
+const create_site_structure_json = (directory, base_path, exclusions) => {
   const root_index_path = path.join(directory, 'index.html');
-  const root_title = fs.existsSync(root_index_path) ? get_title_from_html(root_index_path) : 'Home'; // Fallback to 'Home' if no index.html exists
+  const root_title = fs.existsSync(root_index_path) ? get_title_from_html(root_index_path) : 'Home';
 
   const site_structure = {
     slug: '/',
@@ -21,10 +21,14 @@ const create_site_structure_json = (directory, base_path) => {
     let children = [];
     fs.readdirSync(dir).forEach(item => {
       const fullPath = path.join(dir, item);
+      // Check if the path is excluded
+      const relativePath = path.relative(base_path, fullPath);
+      if (exclusions.some(exclusion => relativePath.startsWith(exclusion))) {
+        return; // Skip excluded paths
+      }
       if (fs.statSync(fullPath).isDirectory()) {
         const index_path = path.join(fullPath, 'index.html');
         if (fs.existsSync(index_path)) {
-          const relativePath = path.relative(base_path, fullPath);
           const slugSegments = parentSlug === '/' ? [parentSlug] : parentSlug.split('/');
           const newSegment = relativePath.split('/').pop();
           const slug = `${slugSegments.join('/')}${newSegment}/`;
@@ -46,9 +50,6 @@ const create_site_structure_json = (directory, base_path) => {
     return children;
   };
 
-  if (fs.existsSync(path.join(directory, 'index.html'))) {
-    site_structure.title = get_title_from_html(path.join(directory, 'index.html'));
-  }
   const rootChildren = processDirectory(directory, '/');
   if (rootChildren.length > 0) {
     site_structure.children = rootChildren;
@@ -57,13 +58,14 @@ const create_site_structure_json = (directory, base_path) => {
   return site_structure;
 };
 
-// Get site_root from command line arguments
+// Get site_root and exclusions from command line arguments
 const args = process.argv.slice(2);
 const site_root = args.find(arg => !arg.startsWith('--')) || './example.com';
+const exclusions = args.filter(arg => arg.startsWith('--exclude=')).map(arg => arg.split('=')[1]);
 const outputArg = args.find(arg => arg.startsWith('--output='));
 const outputFile = outputArg ? outputArg.split('=')[1] : null;
 
-const result = JSON.stringify(create_site_structure_json(site_root, site_root), null, 2);
+const result = JSON.stringify(create_site_structure_json(site_root, site_root, exclusions), null, 2);
 
 if (outputFile) {
   fs.writeFileSync(outputFile, result);
