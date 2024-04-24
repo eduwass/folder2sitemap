@@ -2,90 +2,73 @@
 const fs = require('fs');
 const path = require('path');
 
-const get_title_from_html = (filePath) => {
-  const htmlContent = fs.readFileSync(filePath, 'utf8');
-  const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/);
-  return titleMatch ? titleMatch[1] : 'No Title Found';
+const getTitleFromHTML = (filePath) => {
+  try {
+    const htmlContent = fs.readFileSync(filePath, 'utf8');
+    const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/);
+    return titleMatch ? titleMatch[1] : 'No Title Found';
+  } catch (error) {
+    console.error(`Error reading file ${filePath}: ${error}`);
+    return 'No Title Found';
+  }
 };
 
-const create_site_structure_json = (directory, base_path, exclusions) => {
-  const root_index_path = path.join(directory, 'index.html');
-  const root_title = fs.existsSync(root_index_path) ? get_title_from_html(root_index_path) : 'Home';
+const createSiteStructureJSON = (directory, basePath, exclusions) => {
+  const rootIndexPath = path.join(directory, 'index.html');
+  const rootTitle = fs.existsSync(rootIndexPath) ? getTitleFromHTML(rootIndexPath) : 'Home';
 
-  const site_structure = {
-    slug: '/',
-    title: root_title
-  };
+  const siteStructure = { slug: '/', title: rootTitle };
 
   const processDirectory = (dir, parentSlug) => {
     let children = [];
     fs.readdirSync(dir).forEach(item => {
       const fullPath = path.join(dir, item);
-      const relativePath = path.relative(base_path, fullPath);
-      if (exclusions.some(exclusion => relativePath.startsWith(exclusion))) {
-        return;
-      }
+      const relativePath = path.relative(basePath, fullPath);
+      if (exclusions.some(exclusion => relativePath.startsWith(exclusion))) return;
       if (fs.statSync(fullPath).isDirectory()) {
-        const index_path = path.join(fullPath, 'index.html');
-        if (fs.existsSync(index_path)) {
-          const slugSegments = parentSlug === '/' ? [parentSlug] : parentSlug.split('/');
-          const newSegment = relativePath.split('/').pop();
-          const slug = `${slugSegments.join('/')}${newSegment}/`;
-          const title = get_title_from_html(index_path);
-          const childStructure = {
-            slug: slug,
-            title: title
-          };
-          const childChildren = processDirectory(fullPath, slug);
-          if (childChildren.length > 0) {
-            childStructure.children = childChildren;
-          }
-          children.push(childStructure);
-        } else {
-          children = children.concat(processDirectory(fullPath, `${parentSlug}${item}/`));
-        }
+        children = children.concat(processSubdirectory(fullPath, parentSlug, relativePath));
       }
     });
     return children;
   };
 
-  const rootChildren = processDirectory(directory, '/');
-  if (rootChildren.length > 0) {
-    site_structure.children = rootChildren;
-  }
+  const processSubdirectory = (fullPath, parentSlug, relativePath) => {
+    const index_path = path.join(fullPath, 'index.html');
+    if (fs.existsSync(index_path)) {
+      const slug = `${parentSlug}${relativePath.split('/').pop()}/`;
+      const title = getTitleFromHTML(index_path);
+      const childStructure = { slug, title };
+      const childChildren = processDirectory(fullPath, slug);
+      if (childChildren.length > 0) childStructure.children = childChildren;
+      return [childStructure];
+    } else {
+      return processDirectory(fullPath, `${parentSlug}${relativePath}/`);
+    }
+  };
 
-  return site_structure;
+  siteStructure.children = processDirectory(directory, '/');
+  return siteStructure;
 };
 
 const convertToCSV = (siteStructure) => {
   let csv = 'slug,title\n';
   const processNode = (node, parentSlug = '') => {
-    // Ensure that there is no double slash when concatenating parentSlug and node.slug
-    const fullSlug = parentSlug === '/' ? `${node.slug}` : `${node.slug}`;
+    const fullSlug = parentSlug === '/' ? node.slug : `${parentSlug}${node.slug}`;
     csv += `"${fullSlug}","${node.title.replace(/"/g, '""')}"\n`;
-    if (node.children) {
-      node.children.forEach(child => processNode(child, fullSlug));
-    }
+    node.children?.forEach(child => processNode(child, fullSlug));
   };
   processNode(siteStructure);
   return csv;
 };
 
 const args = process.argv.slice(2);
-const site_root = args.find(arg => !arg.startsWith('--')) || './example.com';
+const siteRoot = args.find(arg => !arg.startsWith('--')) || './example.com';
 const exclusions = args.filter(arg => arg.startsWith('--exclude=')).map(arg => arg.split('=')[1]);
-const outputArg = args.find(arg => arg.startsWith('--output='));
-const outputFile = outputArg ? outputArg.split('=')[1] : null;
-const formatArg = args.find(arg => arg.startsWith('--format='));
-const outputFormat = formatArg ? formatArg.split('=')[1] : 'json';
+const outputFile = args.find(arg => arg.startsWith('--output='))?.split('=')[1];
+const outputFormat = args.find(arg => arg.startsWith('--format='))?.split('=')[1] || 'json';
 
-const siteStructure = create_site_structure_json(site_root, site_root, exclusions);
-let result;
-if (outputFormat === 'csv') {
-  result = convertToCSV(siteStructure);
-} else {
-  result = JSON.stringify(siteStructure, null, 2);
-}
+const siteStructure = createSiteStructureJSON(siteRoot, siteRoot, exclusions);
+const result = outputFormat === 'csv' ? convertToCSV(siteStructure) : JSON.stringify(siteStructure, null, 2);
 
 if (outputFile) {
   fs.writeFileSync(outputFile, result);
