@@ -12,9 +12,9 @@ Folder2Sitemap is a Node.js script designed to generate a JSON representation of
 Folder2Sitemap relies on the following dependencies:
 - [jsdom](package.json#3%2C6-3%2C6): For parsing HTML content. Ensure you have it in your [package.json](package.json#1%2C1-1%2C1) dependencies.
 ```json:package.json
-2|  "dependencies": {
-3|    "jsdom": "^24.0.0"
-4|  }
+  "dependencies": {
+    "jsdom": "^24.0.0"
+  }
 ```
 
 ## Installation
