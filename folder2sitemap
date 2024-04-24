@@ -14,11 +14,11 @@ const create_site_structure_json = (directory, base_path) => {
 
   const site_structure = {
     slug: '/',
-    title: root_title,
-    children: []
+    title: root_title
   };
 
   const processDirectory = (dir, parentSlug) => {
+    let children = [];
     fs.readdirSync(dir).forEach(item => {
       const fullPath = path.join(dir, item);
       if (fs.statSync(fullPath).isDirectory()) {
@@ -31,22 +31,28 @@ const create_site_structure_json = (directory, base_path) => {
           const title = get_title_from_html(index_path);
           const childStructure = {
             slug: slug,
-            title: title,
-            children: []
+            title: title
           };
-          processDirectory(fullPath, slug);
-          site_structure.children.push(childStructure);
+          const childChildren = processDirectory(fullPath, slug);
+          if (childChildren.length > 0) {
+            childStructure.children = childChildren;
+          }
+          children.push(childStructure);
         } else {
-          processDirectory(fullPath, `${parentSlug}${item}/`);
+          children = children.concat(processDirectory(fullPath, `${parentSlug}${item}/`));
         }
       }
     });
+    return children;
   };
 
   if (fs.existsSync(path.join(directory, 'index.html'))) {
     site_structure.title = get_title_from_html(path.join(directory, 'index.html'));
   }
-  processDirectory(directory, '/');
+  const rootChildren = processDirectory(directory, '/');
+  if (rootChildren.length > 0) {
+    site_structure.children = rootChildren;
+  }
 
   return site_structure;
 };
