@@ -32,7 +32,6 @@ The script extracts the title of each page from the `<title>` tag in the HTML fi
 ## Installation
 1. Ensure you have Node.js installed on your system.
 2. Clone this repository or download the script to your local machine.
-3. Install the required dependencies by running `npm install` in the directory where the script is located.
 
 ## Usage
 To use folder2sitemap, run the script from the command line, passing the path to the root directory of your website as an argument:
